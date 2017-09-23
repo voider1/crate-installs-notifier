@@ -3,13 +3,16 @@ A little program which shows you the amount of downloads of you crate.
 Only works on MacOS.
 
 ## Setup
-Firstly, build it with the release flag with Cargo:
+Firstly, run it once with the release flag (this makes sure the config file is generated):
 
 ```shell
-cargo build --release
+cargo run --release
 ```
 
-After this has completed you should customize the plist file in the repo to your liking
+After this has completed you'll notice nothing has happened, but if you look at `~/.config/crate-installs-notifier/config.yaml` you can configure the program.
+Add an entry to the YAML array with the attributes name: string and downloads: int. If you run it again it'll show you a notification and update the downloads attribute.
+
+Now you should customize the plist file in the repo to your liking
 (refer to [this page](https://developer.apple.com/library/content/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/ScheduledJobs.html#//apple_ref/doc/uid/10000172i-CH1-SW2))
 for more information on how to customize the config.
 
