@@ -11,6 +11,8 @@ extern crate tokio_core;
 
 use std::mem;
 use std::io::{self, Cursor};
+use std::thread::sleep;
+use std::time::Duration;
 
 use futures::{Future, Stream};
 use futures::stream::futures_unordered;
@@ -36,6 +38,7 @@ fn main() {
     let mut core = Core::new().expect("Something went wrong with the core");
     let client = Client::new(&core.handle());
     let config = Config::new().unwrap();
+    let duration = Duration::new(6, 0);
 
     let work = futures_unordered(config.crates.iter().map(|c| {
         let uri =
@@ -56,20 +59,21 @@ fn main() {
 
     let notify = work.map_err(ReqError).fold(config, |mut config, b| {
         let name = b["crates"][0]["name"].as_str().unwrap();
-        let downloads = b["crates"][0]["downloads"].as_i64().unwrap();
+        let old_downloads = b["crates"][0]["downloads"].as_i64().unwrap();
 
         for c in &mut config.crates {
             if c.name == name {
-                let difference = downloads - c.downloads;
-                let message = format!{"Amount of downloads were {} and are now {}. A difference of {}", c.downloads, downloads, difference};
+                let difference = old_downloads - c.downloads;
+                let message = format!{"Amount of downloads were {} and are now {}. A difference of {}", c.downloads, old_downloads, difference};
 
                 send_notification(name, &None, &message, &None).unwrap();
-                c.downloads = downloads;
+                c.downloads = old_downloads;
                 break;
             }
         }
 
         let tmp: Result<Config> = Ok(config);
+        sleep(duration);
         tmp
     });
 
